@@ -43,6 +43,7 @@ def plot_result(outdirs):
         plot_result_internal(outdir)
     plt.xlabel('LL cache size')
     plt.ylabel('Local miss rate')
+    # plt.ylim(0, 1)
     plt.title('Local miss rate vs LL cache size')
     plt.legend(loc='upper right')
     plt.show()
