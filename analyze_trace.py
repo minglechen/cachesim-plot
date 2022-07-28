@@ -4,7 +4,7 @@ import plot_result as pr
 L1D_cache_sizes = ['16K', '32K', '64K', '128K']
 LL_cache_sizes = ['2M', '4M', '8M', '16M', '32M']
 run_args = ['-t', 'drcachesim', '-indir']
-processes = [] 
+processes_dict = {} 
 outdir_dict = {}
 
 parser = argparse.ArgumentParser(description='Run drcachesim on trace with different cache sizes.')
@@ -40,13 +40,17 @@ for i, indir in enumerate(args.indirs):
 
 for s in args.LL_cache_sizes:
     for indir in args.indirs:
-        if outdir_dict[indir] in os.listdir(indir) and not args.rerun_sim:
+        if os.path.isfile(outdir_dict[indir] + "/LL_size_" + s + ".txt") and not args.rerun_sim:
             continue
-        processes.append(subprocess.Popen([args.bin] + run_args + [indir, '-LL_size', s], stderr=subprocess.PIPE))
+        p = subprocess.Popen([args.bin] + run_args + [indir, '-LL_size', s], stderr=subprocess.PIPE)
+        processes_dict[p] = (outdir_dict[indir], s)
 
-for p in processes:
+for kvp in processes_dict.items():
+    p = kvp[0]
+    outdir = kvp[1][0]
+    size = kvp[1][1]
     err = p.communicate()[1];
-    with open(outdir_dict[p.args[4]] + "/LL_size_" + p.args[-1] + ".txt", "w") as f: 
+    with open(outdir + "/LL_size_" + size + ".txt", "w") as f: 
         f.write(err.decode())
 
 pr.plot_result(outdir_dict.values())
